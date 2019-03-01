@@ -1,1 +1,1 @@
-# moodle-tool_image_organizer
+# moodle-tool_imageorganizer

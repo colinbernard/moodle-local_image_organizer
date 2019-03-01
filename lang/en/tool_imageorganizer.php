@@ -1,0 +1,12 @@
+<?php
+
+$string['pluginname'] = 'Image Organizer';
+
+$string['heading'] = 'Image Organizer';
+$string['courses'] = 'Courses';
+$string['run'] = 'Run';
+$string['instructions'] = 'The Image Organizer plugin will find all image links in a course and download images to a directory called \'[COURSE ID]_[COURSE_SHORTNAME]\' within a specified directory.';
+$string['directory'] = 'Directory';
+$string['directory_help'] = 'Course directories containing images for each course will be created in this directory. Example: /_LOR/course_pics/ will add images to https://YOUR_DOMAIN.com/_LOR/course_pics/';
+
+$string['backtoform'] = 'Back to Image Organizer form';
