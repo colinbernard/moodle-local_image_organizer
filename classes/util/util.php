@@ -32,7 +32,7 @@ class util {
     return preg_replace($old_url, $new_url, $content, 1);
   }
 
-  public static function update_courses($course_ids = array(), $target_directory) {
+  public static function update_courses($course_ids = array(), $target_directory, $pluginfile) {
     global $DB, $CFG;
 
     mtrace("Starting update for " . count($course_ids) . " courses using $target_directory.");
@@ -55,7 +55,7 @@ class util {
         mtrace('#####################################################################################');
 
         // Where we will be placing images for this course.
-        $server_directory = "$CFG->dirroot/_LOR/course_pics/" . $course_id . "_" . rawurlencode(preg_replace('/\s+/', '_', $course->shortname));
+        $server_directory = "$CFG->dirroot$target_directory" . $course_id . "_" . rawurlencode(preg_replace('/\s+/', '_', $course->shortname));
 
         // Check if the directory exists, if not... create it.
         if (!file_exists($server_directory)) {
@@ -70,7 +70,7 @@ class util {
 
         // Retrive all book chapters for this course.
         $book_chapters = $DB->get_records_sql(
-          'SELECT {book_chapters}.id, {book_chapters}.content, {book_chapters}.title
+          'SELECT {book_chapters}.id, {book_chapters}.content, {book_chapters}.title, bookid
            FROM {book_chapters}, {book}
            WHERE {book_chapters}.bookid = {book}.id
            AND {book}.course = ?', array($course->id)
@@ -90,7 +90,7 @@ class util {
 
              // Search content for images.
              $image_urls = array();
-             $pattern = '/(?i)http(s?):\/\/(bclearningnetwork|wcln).{1,100}\/((.{1,50})(\.png|\.jpg|\.jpeg|\.gif))/';
+             $pattern = '/(?i)http(s?):\/\/(bclearningnetwork|wcln).{1,100}\/((.{1,50})(\.png|\.jpg|\.jpeg|\.gif))|@@pluginfile@@\/(.{1,50})(\.png|\.jpg|\.jpeg|\.gif)/';
              preg_match_all($pattern, $content, $image_urls, PREG_SET_ORDER);
 
              mtrace("Found " . count($image_urls) . " images.");
@@ -99,13 +99,25 @@ class util {
              // For each of the image links we found.
              foreach ($image_urls as $image_url) {
 
-               $full_image_path = $image_url[0];
-               $image_name = $image_url[3];
-               $image_name_without_file_type = $image_url[4];
-               $image_file_type = $image_url[5];
+               // If we are searching for pluginfile images as well, and if one was found.
+               if ($pluginfile && isset($image_url[6])) {
+                 $image_name = $image_url[6] . $image_url[7];
+                 $image_name_without_file_type = $image_url[6];
+                 $image_file_type = $image_url[7];
+
+                 $cm = $DB->get_record('course_modules', array('instance' => $book_chapter->bookid, 'course' => $course_id));
+                 $context_id = \context_module::instance($cm->id)->id;
+                 $full_image_path = "$CFG->wwwroot/pluginfile.php/$context_id/mod_book/chapter/$book_chapter->id/$image_name";
+               } else {
+                 $full_image_path = $image_url[0];
+                 $image_name = $image_url[3];
+                 $image_name_without_file_type = $image_url[4];
+                 $image_file_type = $image_url[5];
+               }
+
                $save_location = $server_directory . "/" . $image_name;
 
-               mtrace("Found image: " . $image_url[0]);
+               mtrace("Found image: " . $full_image_path);
 
                // Ensure we aren't overwriting an existing image.
                if (!file_exists($save_location)) {
@@ -154,7 +166,7 @@ class util {
                // Update the link in the content.
                if ($full_image_path != $new_url) {
                  $book_chapter->content = self::update_url_in_content($content, $full_image_path, $new_url);
-                 $DB->update_record('book_chapters', $book_chapter);
+                 //$DB->update_record('book_chapters', $book_chapter);
                  mtrace("Updated this image URL in the database.");
                }
              }

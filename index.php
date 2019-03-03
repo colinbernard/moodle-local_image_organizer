@@ -27,7 +27,7 @@ if ($fromform = $form->get_data()) {
   echo html_writer::start_tag('pre');
   $CFG->mtrace_wrapper = 'tool_task_mtrace_wrapper';
 
-  util::update_courses($fromform->courses, $fromform->directory);
+  util::update_courses($fromform->courses, $fromform->directory, $fromform->pluginfile);
 
   echo html_writer::end_tag('pre');
 

@@ -24,6 +24,10 @@ class action_form extends \moodleform {
     $mform->setDefault('directory', '/_LOR/course_pics/');
     $mform->addHelpButton('directory', 'directory', 'tool_imageorganizer');
 
+    $mform->addElement('checkbox', 'pluginfile', get_string('pluginfile', 'tool_imageorganizer'));
+    $mform->setDefault('pluginfile', 1);
+    $mform->addHelpButton('pluginfile', 'pluginfile', 'tool_imageorganizer');
+
     $this->add_action_buttons(false, get_string('run', 'tool_imageorganizer'));
 
   }
