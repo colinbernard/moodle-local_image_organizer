@@ -12,18 +12,31 @@ class util {
     return $DB->get_records_menu('course', null, '', 'id, fullname');
   }
 
-  private static function save_image($save_location, $image_url) {
+  private static function save_image($save_location, $image_url, $fileinfo = null) {
 
-    $file_contents = file_get_contents($image_url);
+    // Pluginfile saving.
+    if (!is_null($fileinfo)) {
 
-    if ($file_contents !== false && filesize($file_contents) !== 0) {
-      file_put_contents($save_location, $file_contents);
-      self::$saved_count++;
-      mtrace("Saved $image_name to $save_location.");
-      return true;
+      $browser = get_file_browser();
+      $context = get_system_context();
+
+      $fileinfo = $browser->get_file_info($fileinfo['context'], $fileinfo['component'], $fileinfo['filearea'], $fileinfo['itemid'], '/', $fileinfo['filename']);
+      var_dump($fileinfo);
+
+
+    // Normal file saving.
     } else {
-      mtrace("ERROR 404 failed to save image.");
-      return false;
+      $file_contents = file_get_contents($image_url);
+
+      if ($file_contents !== false && filesize($file_contents) !== 0) {
+        file_put_contents($save_location, $file_contents);
+        self::$saved_count++;
+        mtrace("Saved $image_name to $save_location.");
+        return true;
+      } else {
+        mtrace("ERROR 404 failed to save image.");
+        return false;
+      }
     }
   }
 
@@ -99,6 +112,8 @@ class util {
              // For each of the image links we found.
              foreach ($image_urls as $image_url) {
 
+               $fileinfo = null;
+
                // If we are searching for pluginfile images as well, and if one was found.
                if ($pluginfile && isset($image_url[6])) {
                  $image_name = $image_url[6] . $image_url[7];
@@ -106,8 +121,17 @@ class util {
                  $image_file_type = $image_url[7];
 
                  $cm = $DB->get_record('course_modules', array('instance' => $book_chapter->bookid, 'course' => $course_id));
-                 $context_id = \context_module::instance($cm->id)->id;
-                 $full_image_path = "$CFG->wwwroot/pluginfile.php/$context_id/mod_book/chapter/$book_chapter->id/$image_name";
+                 $context = \context_module::instance($cm->id);
+                 $full_image_path = "$CFG->wwwroot/pluginfile.php/$context->id/mod_book/chapter/$book_chapter->id/$image_name";
+
+                 $fileinfo = array(
+                    'component' => 'mod_book',
+                    'filearea' => 'chapter',
+                    'itemid' => $book_chapter->bookid,
+                    'context' => $context,
+                    'filepath' => '/',
+                    'filename' => $image_name
+                 );
                } else {
                  $full_image_path = $image_url[0];
                  $image_name = $image_url[3];
@@ -123,7 +147,7 @@ class util {
                if (!file_exists($save_location)) {
 
                  // Save the image.
-                 if(!self::save_image($save_location, $full_image_path)) {
+                 if(!self::save_image($save_location, $full_image_path, $fileinfo)) {
                    break;
                  }
 
@@ -148,7 +172,7 @@ class util {
                  // Save the image.
                  if ($save) {
 
-                   if(!self::save_image($save_location, $full_image_path)) {
+                   if(!self::save_image($save_location, $full_image_path, $fileinfo)) {
                      break;
                    }
 
