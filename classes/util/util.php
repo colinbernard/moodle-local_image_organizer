@@ -20,9 +20,19 @@ class util {
       $browser = get_file_browser();
       $context = get_system_context();
 
-      $fileinfo = $browser->get_file_info($fileinfo['context'], $fileinfo['component'], $fileinfo['filearea'], $fileinfo['itemid'], '/', $fileinfo['filename']);
-      var_dump($fileinfo);
-
+      $file = $browser->get_file_info($fileinfo['context'], $fileinfo['component'], $fileinfo['filearea'], $fileinfo['itemid'], '/', $fileinfo['filename']);
+      if (!is_null($file)) {
+        if ($file->copy_to_pathname($save_location)) {
+          self::$saved_count++;
+          mtrace("Saved $image_name to $save_location.");
+          return true;
+        } else {
+          mtrace("Error saving pluginfile image.");
+        }
+      } else {
+        mtrace("ERROR 404 failed to save image.");
+        return false;
+      }
 
     // Normal file saving.
     } else {
@@ -127,7 +137,7 @@ class util {
                  $fileinfo = array(
                     'component' => 'mod_book',
                     'filearea' => 'chapter',
-                    'itemid' => $book_chapter->bookid,
+                    'itemid' => $book_chapter->id,
                     'context' => $context,
                     'filepath' => '/',
                     'filename' => $image_name
