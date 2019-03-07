@@ -102,14 +102,14 @@ class util {
 
          // Retrieve all quizzes for this course.
          $quizzes = $DB->get_records_sql(
-           'SELECT {quiz}.id, {quiz}.intro
+           'SELECT id, intro, name
             FROM {quiz}
             WHERE course = ?', array($course->id)
          );
 
          // Retrieve all assignments for this course.
          $assigns = $DB->get_records_sql(
-           'SELECT {assign}.id, {assign}.intro
+           'SELECT id, intro, name
             FROM {assign}
             WHERE course = ?', array($course->id)
          );
@@ -130,12 +130,12 @@ class util {
              // For each of the image links we found.
              foreach ($image_urls as $image_url) {
 
-               $image_info = self::get_image_info($image_url, 'book', $course_id, $book_chapter->id, $pluginfile, $book_chapter->bookid);
+               $image_info = self::get_image_info($image_url, 'book', $course_id, $book_chapter, $pluginfile);
                $new_url = self::process_image($server_directory, $image_info);
 
                // Update the link in the content.
                if ($image_info['full_image_path'] != $new_url) {
-                 $book_chapter->content = self::update_url_in_content($content, $image_info['full_image_path'], $new_url);
+                 //$book_chapter->content = self::update_url_in_content($content, $image_info['full_image_path'], $new_url);
                  //$DB->update_record('book_chapters', $book_chapter);
                  mtrace("Updated this image URL in the database.");
                }
@@ -143,11 +143,49 @@ class util {
            }
 
            foreach ($quizzes as $quiz) {
+             mtrace('-------------------------------------------------');
+             mtrace("Searching quiz '$quiz->name' for images...");
 
+             // Store content.
+             $content = $quiz->intro;
+             $image_urls = self::find_all_image_urls($content);
+
+             // For each of the image links we found.
+             foreach ($image_urls as $image_url) {
+
+               $image_info = self::get_image_info($image_url, 'quiz', $course_id, $quiz, $pluginfile);
+               $new_url = self::process_image($server_directory, $image_info);
+
+               // Update the link in the content.
+               if ($image_info['full_image_path'] != $new_url) {
+                 //$book_chapter->content = self::update_url_in_content($content, $image_info['full_image_path'], $new_url);
+                 //$DB->update_record('book_chapters', $book_chapter);
+                 mtrace("Updated this image URL in the database.");
+               }
+             }
            }
 
            foreach ($assigns as $assign) {
+             mtrace('-------------------------------------------------');
+             mtrace("Searching assignment '$assign->name' for images...");
 
+             // Store content.
+             $content = $assign->intro;
+             $image_urls = self::find_all_image_urls($content);
+
+             // For each of the image links we found.
+             foreach ($image_urls as $image_url) {
+
+               $image_info = self::get_image_info($image_url, 'assign', $course_id, $assign, $pluginfile);
+               $new_url = self::process_image($server_directory, $image_info);
+
+               // Update the link in the content.
+               if ($image_info['full_image_path'] != $new_url) {
+                 //$book_chapter->content = self::update_url_in_content($content, $image_info['full_image_path'], $new_url);
+                 //$DB->update_record('book_chapters', $book_chapter);
+                 mtrace("Updated this image URL in the database.");
+               }
+             }
            }
 
          } else {
@@ -225,8 +263,8 @@ class util {
     return $new_url;
   }
 
-  private static function get_image_info($image_url, $type, $course_id, $item_id, $pluginfile = false, $book_id) {
-    global $DB;
+  private static function get_image_info($image_url, $type, $course_id, $item, $pluginfile = false) {
+    global $DB, $CFG;
 
     $image_info = [];
 
@@ -237,15 +275,15 @@ class util {
       $image_info['image_file_type'] = $image_url[7];
 
       if ($type === "book") {
-        $cm = $DB->get_record('course_modules', array('instance' => $book_id, 'course' => $course_id));
+        $cm = $DB->get_record('course_modules', array('instance' => $item->bookid, 'course' => $course_id));
         if ($cm) {
           $context = \context_module::instance($cm->id);
-          $image_info['full_image_path'] = "$CFG->wwwroot/pluginfile.php/$context->id/mod_book/chapter/$item_id/" . $image_info['image_name'];
+          $image_info['full_image_path'] = "$CFG->wwwroot/pluginfile.php/$context->id/mod_book/chapter/$item->id/" . $image_info['image_name'];
 
           $fileinfo = array(
              'component' => 'mod_book',
              'filearea' => 'chapter',
-             'itemid' => $item_id,
+             'itemid' => $item->id,
              'context' => $context,
              'filepath' => '/',
              'filename' => $image_info['image_name']
@@ -259,9 +297,47 @@ class util {
           return false;
         }
       } else if ($type === "quiz") {
+        $cm = $DB->get_record('course_modules', array('instance' => $item->id, 'course' => $course_id));
+        if ($cm) {
+          $context = \context_module::instance($cm->id);
+          $image_info['full_image_path'] = "$CFG->wwwroot/pluginfile.php/$context->id/mod_quiz/intro/0/" . $image_info['image_name'];
 
+          $fileinfo = array(
+             'component' => 'mod_quiz',
+             'filearea' => 'intro',
+             'itemid' => 0,
+             'context' => $context,
+             'filepath' => '/',
+             'filename' => $image_info['image_name']
+          );
+
+          $image_info['fileinfo'] = $fileinfo;
+
+        } else {
+          mtrace("ERROR retrieving context.");
+          return false;
+        }
       } else if ($type === "assign") {
+        $cm = $DB->get_record('course_modules', array('instance' => $item->id, 'course' => $course_id));
+        if ($cm) {
+          $context = \context_module::instance($cm->id);
+          $image_info['full_image_path'] = "$CFG->wwwroot/pluginfile.php/$context->id/mod_assign/intro/0/" . $image_info['image_name'];
 
+          $fileinfo = array(
+             'component' => 'mod_assign',
+             'filearea' => 'intro',
+             'itemid' => 0,
+             'context' => $context,
+             'filepath' => '/',
+             'filename' => $image_info['image_name']
+          );
+
+          $image_info['fileinfo'] = $fileinfo;
+
+        } else {
+          mtrace("ERROR retrieving context.");
+          return false;
+        }
       } else {
         mtrace("ERROR Invalid type.");
         return false;
