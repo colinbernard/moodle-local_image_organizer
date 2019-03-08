@@ -2,17 +2,40 @@
 
 namespace tool_imageorganizer\util;
 
+/**
+ * Utilities class to support image organization.
+ */
 class util {
 
+  /**
+   * The number of images which were saved to the server.
+   * @var int
+   */
   private static $saved_count = 0;
+
+  /**
+   * The number of images found.
+   * @var int
+   */
   private static $total_image_count = 0;
 
+  /**
+   * Returns all courses on the Moodle site.
+   * @return array Array of courses.
+   */
   public static function get_all_courses() {
     global $DB;
 
     return $DB->get_records_menu('course', null, '', 'id, fullname');
   }
 
+  /**
+   * Saves an image to a specified location on the server.
+   * @param  string $save_location The location to save the image to.
+   * @param  string $image_url     The URL of the image to save.
+   * @param  array $fileinfo      Optional file information. Used for saving pluginfile images.
+   * @return boolean                Success?
+   */
   private static function save_image($save_location, $image_url, $fileinfo = null) {
 
     // Pluginfile saving.
@@ -51,11 +74,25 @@ class util {
     }
   }
 
+  /**
+   * Replaces a URL in a string.
+   * @param  string $content HTML content as a string.
+   * @param  string $old_url The old URL to be replaced.
+   * @param  string $new_url The new URL to replace the old URL.
+   * @return string          The HTML content with the URL replaced.
+   */
   private static function update_url_in_content($content, $old_url, $new_url) {
     $old_url = '/'.preg_quote($old_url, '/').'/';
     return preg_replace($old_url, $new_url, $content, 1);
   }
 
+  /**
+   * The main "controller" function which loops through all the specified courses
+   * and calls other functions to facilitate image organization.
+   * @param  array  $course_ids  An array of course IDs to update.
+   * @param  string  $target_directory  The target directory to store images in.
+   * @param  boolean  $pluginfile  Whether or not we should search for Moodle database images.
+   */
   public static function update_courses($course_ids = array(), $target_directory, $pluginfile) {
     global $DB, $CFG;
 
@@ -199,6 +236,12 @@ class util {
     mtrace("Done. ".self::$total_image_count." images were found and organized. ".self::$saved_count." were uploaded to the directory.");
   }
 
+  /**
+   * Returns an array of image URL matches.
+   * @param  string $content HTML content to search for image URLs.
+   * @param  string $domains A string of domains (separated by |) to match.
+   * @return array         An array of image URL matches.
+   */
   private static function find_all_image_urls($content, $domains = 'bclearningnetwork|wcln') {
     // Search content for images.
     $image_urls = array();
@@ -209,6 +252,12 @@ class util {
     return $image_urls;
   }
 
+  /**
+   * Determine how to save an image, and generate a new URL for it.
+   * @param  string $server_directory Where images are being placed for this course.
+   * @param  array $image_info       Assoc. array of image information.
+   * @return string                  The new URL of the image.
+   */
   private static function process_image($server_directory, $image_info) {
     global $CFG;
 
@@ -263,6 +312,16 @@ class util {
     return $new_url;
   }
 
+  /**
+   * Given an image URL and other supporting information,
+   * returns image information required for further processing.
+   * @param  array  $image_url  The matches from the regex image URL search.
+   * @param  string  $type       The type of module: book/quiz/assign.
+   * @param  int  $course_id  The ID of the current course we are searching in.
+   * @param  object  $item       The module we are currently searching inside of.
+   * @param  boolean $pluginfile Whether or not we should be searching for pluginfile database images.
+   * @return array             Returns an assoc. array of image information. Or false if unable to.
+   */
   private static function get_image_info($image_url, $type, $course_id, $item, $pluginfile = false) {
     global $DB, $CFG;
 
@@ -356,8 +415,8 @@ class util {
   /**
    * Determines if two images are in fact the same image.
    * This helps to avoid duplicate images on the server.
-   * @param  [type]  $save_location The existing image on the server.
-   * @param  [type]  $image_info    The information of the new image we are comparing to the existing one.
+   * @param  string  $save_location The existing image on the server.
+   * @param  array  $image_info    The information of the new image we are comparing to the existing one.
    * @return boolean                True if the two images are the same, false if they are different.
    */
   private static function is_same_image($save_location, $image_info) {
