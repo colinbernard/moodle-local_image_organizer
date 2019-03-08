@@ -202,7 +202,7 @@ class util {
   private static function find_all_image_urls($content, $domains = 'bclearningnetwork|wcln') {
     // Search content for images.
     $image_urls = array();
-    $pattern = "/(?i)http(s?):\/\/($domains).{1,50}\/((.{1,50})(\.png|\.jpg|\.jpeg|\.gif))|@@pluginfile@@\/([a-zA-Z 0-9\.\+\-\/_]{1,50})(\.png|\.jpg|\.jpeg|\.gif)/";
+    $pattern = "/(?i)http(s?):\/\/($domains)\.[a-zA-Z 0-9\+\-\/_]{1,50}\/(([a-zA-Z 0-9\+\-\/_]{1,50})(\.png|\.jpg|\.jpeg|\.gif))|@@pluginfile@@\/([a-zA-Z 0-9\+\-\/_]{1,50})(\.png|\.jpg|\.jpeg|\.gif)/";
     preg_match_all($pattern, $content, $image_urls, PREG_SET_ORDER);
     mtrace("Found " . count($image_urls) . " images.");
     self::$total_image_count += count($image_urls);
