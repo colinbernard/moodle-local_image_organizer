@@ -224,7 +224,7 @@ class util {
         return false;
       }
 
-    } else if (md5(file_get_contents($save_location)) != md5(file_get_contents($image_info['full_image_path']))) { // TODO, this check will only work for non plugin file images.
+    } else if (self::is_same_image($save_location, $image_info)) {
 
       // Not the same image... Change the name of the new image.
       $i = 0;
@@ -232,7 +232,7 @@ class util {
       while(file_exists($save_location)) {
 
         // Check again for duplicate images as we increase file name counter.
-        if (md5(file_get_contents($save_location)) == md5(file_get_contents($image_info['full_image_path']))) {
+        if (self::is_same_image($save_location, $image_info)) {
           $save = false;
           break;
         }
@@ -351,5 +351,49 @@ class util {
       $image_info['fileinfo'] = null;
     }
     return $image_info;
+  }
+
+  /**
+   * Determines if two images are in fact the same image.
+   * This helps to avoid duplicate images on the server.
+   * @param  [type]  $save_location The existing image on the server.
+   * @param  [type]  $image_info    The information of the new image we are comparing to the existing one.
+   * @return boolean                True if the two images are the same, false if they are different.
+   */
+  private static function is_same_image($save_location, $image_info) {
+
+    // If the image is not stored in the Moodle database (pluginfile).
+    if (is_null($image_info['fileinfo'])) {
+      return md5(file_get_contents($save_location)) == md5(file_get_contents($image_info['full_image_path']));
+    } else {
+      // The image is stored in the Moodle database (pluginfile).
+      // This means are job is going to be a fair bit more complicated...
+
+      // Generate a random and temporary URL to which we will save the pluginfile image.
+      $rand = rand(1, 10000);
+      $temp_url = str_replace($image_info['image_name_without_file_type'], "temp_$rand", $save_location);
+
+      // Attempt to save the pluginfile image to our temp location.
+      if (self::save_image($temp_url, $image_info['full_image_path'], $image_info['fileinfo'])) {
+
+        // If the temp file and the existing file are the same.
+        if (md5(file_get_contents($save_location)) == md5(file_get_contents($temp_url))) {
+          // Delete the temp file.
+          // They are the same image!
+          unlink($temp_url);
+          return true;
+        } else {
+          // Delete the temp file.
+          // Not the same image...
+          unlink($temp_url);
+          return false;
+        }
+      } else {
+        // Unable to save, return false.
+        return false;
+      }
+      // Default: return false.
+      return false;
+    }
   }
 }
