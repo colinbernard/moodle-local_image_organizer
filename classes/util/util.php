@@ -79,7 +79,7 @@ class util {
         mtrace('#####################################################################################');
 
         // Where we will be placing images for this course.
-        $server_directory = "$CFG->dirroot$target_directory" . $course_id . "_" . rawurlencode(preg_replace('/\s+/', '_', $course->shortname));
+        $server_directory = "$CFG->dirroot$target_directory" . $course_id . "_" . rawurlencode(preg_replace('/\s+/', '', $course->shortname));
 
         // Check if the directory exists, if not... create it.
         if (!file_exists($server_directory)) {
@@ -121,7 +121,7 @@ class util {
            foreach ($book_chapters as $book_chapter) {
 
              mtrace('-------------------------------------------------');
-             mtrace("Searching book chapter '$book_chapter->title' for images...");
+             mtrace("Searching book chapter '".str_replace("\"", "", $book_chapter->title)."' for images...");
 
              // Store content.
              $content = $book_chapter->content;
@@ -144,7 +144,7 @@ class util {
 
            foreach ($quizzes as $quiz) {
              mtrace('-------------------------------------------------');
-             mtrace("Searching quiz '$quiz->name' for images...");
+             mtrace("Searching quiz '".str_replace("\"", "", $quiz->name)."' for images...");
 
              // Store content.
              $content = $quiz->intro;
@@ -167,7 +167,7 @@ class util {
 
            foreach ($assigns as $assign) {
              mtrace('-------------------------------------------------');
-             mtrace("Searching assignment '$assign->name' for images...");
+             mtrace("Searching assignment '".str_replace("\"", "", $assign->name)."' for images...");
 
              // Store content.
              $content = $assign->intro;
@@ -202,7 +202,7 @@ class util {
   private static function find_all_image_urls($content, $domains = 'bclearningnetwork|wcln') {
     // Search content for images.
     $image_urls = array();
-    $pattern = "/(?i)http(s?):\/\/($domains).{1,100}\/((.{1,50})(\.png|\.jpg|\.jpeg|\.gif))|@@pluginfile@@\/(.{1,50})(\.png|\.jpg|\.jpeg|\.gif)/";
+    $pattern = "/(?i)http(s?):\/\/($domains).{1,50}\/((.{1,50})(\.png|\.jpg|\.jpeg|\.gif))|@@pluginfile@@\/([a-zA-Z 0-9\.\+\-\/_]{1,50})(\.png|\.jpg|\.jpeg|\.gif)/";
     preg_match_all($pattern, $content, $image_urls, PREG_SET_ORDER);
     mtrace("Found " . count($image_urls) . " images.");
     self::$total_image_count += count($image_urls);
