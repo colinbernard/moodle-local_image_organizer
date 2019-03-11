@@ -26,7 +26,7 @@ class util {
   public static function get_all_courses() {
     global $DB;
 
-    return $DB->get_records_menu('course', null, '', 'id, fullname');
+    return $DB->get_records_menu('course', null, 'fullname', 'id, fullname');
   }
 
   /**
