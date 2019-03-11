@@ -273,6 +273,12 @@ class util {
    * @return array         An array of image URL matches.
    */
   private static function find_all_image_urls($content, $domains = 'bclearningnetwork|wcln') {
+
+    // If no domain was set, search for any domain (as long as matches regex below).
+    if ($domains === "") {
+      $domains = "[a-zA-Z 0-9\-]+";
+    }
+
     // Search content for images.
     $image_urls = array();
     $pattern = "/(?i)http(s?):\/\/($domains)\.[a-zA-Z 0-9\+\-\/_]{1,50}\/(([a-zA-Z 0-9\+\-\/_]{1,50})(\.png|\.jpg|\.jpeg|\.gif))|@@pluginfile@@\/([a-zA-Z 0-9\+\-\/_]{1,50})(\.png|\.jpg|\.jpeg|\.gif)/";
