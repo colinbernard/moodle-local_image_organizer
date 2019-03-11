@@ -179,8 +179,8 @@ class util {
 
                // Update the link in the content.
                if ($image_info['full_image_path'] != $new_url && $new_url !== false) {
-                 // $book_chapter->content = self::update_url_in_content($content, $image_info['full_image_path'], $new_url);
-                 // $DB->update_record('book_chapters', $book_chapter);
+                 $book_chapter->content = self::update_url_in_content($content, $image_info['full_image_path'], $new_url);
+                 $DB->update_record('book_chapters', $book_chapter);
                  mtrace("Updated this image URL in the database.");
                }
              }
@@ -202,8 +202,8 @@ class util {
 
                // Update the link in the content.
                if ($image_info['full_image_path'] != $new_url && $new_url !== false) {
-                 // $quiz->intro = self::update_url_in_content($content, $image_info['full_image_path'], $new_url);
-                 // $DB->update_record('quiz', $quiz);
+                 $quiz->intro = self::update_url_in_content($content, $image_info['full_image_path'], $new_url);
+                 $DB->update_record('quiz', $quiz);
                  mtrace("Updated this image URL in the database.");
                }
              }
@@ -225,8 +225,8 @@ class util {
 
                // Update the link in the content.
                if ($image_info['full_image_path'] != $new_url && $new_url !== false) {
-                 // $assign->intro = self::update_url_in_content($content, $image_info['full_image_path'], $new_url);
-                 // $DB->update_record('assign', $assign);
+                 $assign->intro = self::update_url_in_content($content, $image_info['full_image_path'], $new_url);
+                 $DB->update_record('assign', $assign);
                  mtrace("Updated this image URL in the database.");
                }
              }
@@ -248,8 +248,8 @@ class util {
 
                // Update the link in the content.
                if ($image_info['full_image_path'] != $new_url && $new_url !== false) {
-                 // $page->content = self::update_url_in_content($content, $image_info['full_image_path'], $new_url);
-                 // $DB->update_record('page', $page);
+                 $page->content = self::update_url_in_content($content, $image_info['full_image_path'], $new_url);
+                 $DB->update_record('page', $page);
                  mtrace("Updated this image URL in the database.");
                }
              }
