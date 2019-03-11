@@ -36,7 +36,7 @@ class util {
    * @param  array $fileinfo      Optional file information. Used for saving pluginfile images.
    * @return boolean                Success?
    */
-  private static function save_image($save_location, $image_url, $fileinfo = null) {
+  private static function save_image($save_location, $image_url, $fileinfo = null, $increase_count = true) {
 
     // Pluginfile saving.
     if (!is_null($fileinfo)) {
@@ -508,11 +508,13 @@ class util {
           // Delete the temp file.
           // They are the same image!
           unlink($temp_url);
+          self::$saved_count--;
           return true;
         } else {
           // Delete the temp file.
           // Not the same image...
           unlink($temp_url);
+          self::$saved_count--;
           return false;
         }
       } else {
