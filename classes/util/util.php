@@ -172,8 +172,8 @@ class util {
 
                // Update the link in the content.
                if ($image_info['full_image_path'] != $new_url && $new_url !== false) {
-                 $book_chapter->content = self::update_url_in_content($content, $image_info['full_image_path'], $new_url);
-                 $DB->update_record('book_chapters', $book_chapter);
+                 // $book_chapter->content = self::update_url_in_content($content, $image_info['full_image_path'], $new_url);
+                 // $DB->update_record('book_chapters', $book_chapter);
                  mtrace("Updated this image URL in the database.");
                }
              }
@@ -195,8 +195,8 @@ class util {
 
                // Update the link in the content.
                if ($image_info['full_image_path'] != $new_url && $new_url !== false) {
-                 $quiz->intro = self::update_url_in_content($content, $image_info['full_image_path'], $new_url);
-                 $DB->update_record('quiz', $quiz);
+                 // $quiz->intro = self::update_url_in_content($content, $image_info['full_image_path'], $new_url);
+                 // $DB->update_record('quiz', $quiz);
                  mtrace("Updated this image URL in the database.");
                }
              }
@@ -218,8 +218,8 @@ class util {
 
                // Update the link in the content.
                if ($image_info['full_image_path'] != $new_url && $new_url !== false) {
-                 $assign->intro = self::update_url_in_content($content, $image_info['full_image_path'], $new_url);
-                 $DB->update_record('assign', $assign);
+                 // $assign->intro = self::update_url_in_content($content, $image_info['full_image_path'], $new_url);
+                 // $DB->update_record('assign', $assign);
                  mtrace("Updated this image URL in the database.");
                }
              }
@@ -258,12 +258,20 @@ class util {
    * @param  array $image_info       Assoc. array of image information.
    * @return string                  The new URL of the image.
    */
-  private static function process_image($server_directory, $image_info) {
+  private static function process_image($server_directory, $image_info, $ignore_strings = array('wcln.ca/_LOR/projects/', 'wcln.ca/_LOR/group_activities/', 'wcln.ca/_LOR/learning_guides')) {
     global $CFG;
 
     $save_location = $server_directory . "/" . $image_info['image_name'];
 
     mtrace("Found image: " . $image_info['full_image_path']);
+
+    // Check if image URL contains ignore string.
+    foreach ($ignore_strings as $ignore_string) {
+      if (strpos($image_info['full_image_path'], $ignore_string) !== false) {
+        mtrace("Ignoring image as it matches an ignore string.");
+        return false;
+      }
+    }
 
     // Ensure we aren't overwriting an existing image.
     if (!file_exists($save_location)) {
