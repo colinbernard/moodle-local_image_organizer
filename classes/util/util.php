@@ -172,8 +172,8 @@ class util {
 
                // Update the link in the content.
                if ($image_info['full_image_path'] != $new_url) {
-                 //$book_chapter->content = self::update_url_in_content($content, $image_info['full_image_path'], $new_url);
-                 //$DB->update_record('book_chapters', $book_chapter);
+                 $book_chapter->content = self::update_url_in_content($content, $image_info['full_image_path'], $new_url);
+                 $DB->update_record('book_chapters', $book_chapter);
                  mtrace("Updated this image URL in the database.");
                }
              }
@@ -195,8 +195,8 @@ class util {
 
                // Update the link in the content.
                if ($image_info['full_image_path'] != $new_url) {
-                 //$book_chapter->content = self::update_url_in_content($content, $image_info['full_image_path'], $new_url);
-                 //$DB->update_record('book_chapters', $book_chapter);
+                 $quiz->intro = self::update_url_in_content($content, $image_info['full_image_path'], $new_url);
+                 $DB->update_record('quiz', $quiz);
                  mtrace("Updated this image URL in the database.");
                }
              }
@@ -218,8 +218,8 @@ class util {
 
                // Update the link in the content.
                if ($image_info['full_image_path'] != $new_url) {
-                 //$book_chapter->content = self::update_url_in_content($content, $image_info['full_image_path'], $new_url);
-                 //$DB->update_record('book_chapters', $book_chapter);
+                 $assign->intro = self::update_url_in_content($content, $image_info['full_image_path'], $new_url);
+                 $DB->update_record('assign', $assign);
                  mtrace("Updated this image URL in the database.");
                }
              }
