@@ -272,7 +272,7 @@ class util {
    * @param  string $domains A string of domains (separated by |) to match.
    * @return array         An array of image URL matches.
    */
-  private static function find_all_image_urls($content, $domains = 'bclearningnetwork|wcln') {
+  private static function find_all_image_urls($content, $domains = "") {
 
     // If no domain was set, search for any domain (as long as matches regex below).
     if ($domains === "") {
@@ -294,7 +294,7 @@ class util {
    * @param  array $image_info       Assoc. array of image information.
    * @return string                  The new URL of the image.
    */
-  private static function process_image($server_directory, $image_info, $ignore_strings = array('wcln.ca/_LOR/projects/', 'wcln.ca/_LOR/group_activities/', 'wcln.ca/_LOR/learning_guides', 'wcln.ca/_LOR/course_pics/_general')) {
+  private static function process_image($server_directory, $image_info, $ignore_strings = array()) {
     global $CFG;
 
     $save_location = $server_directory . "/" . $image_info['image_name'];
