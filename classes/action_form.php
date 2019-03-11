@@ -24,6 +24,11 @@ class action_form extends \moodleform {
     $mform->setDefault('directory', '/_LOR/course_pics/');
     $mform->addHelpButton('directory', 'directory', 'tool_imageorganizer');
 
+    $mform->addElement('text', 'domains', get_string('domains', 'tool_imageorganizer'));
+    $mform->setType('domains', PARAM_TEXT);
+    $mform->setDefault('domains', 'wcln,bclearningnetwork');
+    $mform->addHelpButton('domains', 'domains', 'tool_imageorganizer');
+
     $mform->addElement('checkbox', 'pluginfile', get_string('pluginfile', 'tool_imageorganizer'));
     $mform->setDefault('pluginfile', 1);
     $mform->addHelpButton('pluginfile', 'pluginfile', 'tool_imageorganizer');

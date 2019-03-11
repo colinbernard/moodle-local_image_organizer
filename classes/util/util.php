@@ -93,7 +93,7 @@ class util {
    * @param  string  $target_directory  The target directory to store images in.
    * @param  boolean  $pluginfile  Whether or not we should search for Moodle database images.
    */
-  public static function update_courses($course_ids = array(), $target_directory, $pluginfile, $ignore_strings) {
+  public static function update_courses($course_ids = array(), $target_directory, $pluginfile, $ignore_strings, $domains) {
     global $DB, $CFG;
 
     mtrace("Starting update for " . count($course_ids) . " courses using $target_directory.");
@@ -169,7 +169,7 @@ class util {
 
              // Store content.
              $content = $book_chapter->content;
-             $image_urls = self::find_all_image_urls($content);
+             $image_urls = self::find_all_image_urls($content, $domains);
 
              // For each of the image links we found.
              foreach ($image_urls as $image_url) {
@@ -192,7 +192,7 @@ class util {
 
              // Store content.
              $content = $quiz->intro;
-             $image_urls = self::find_all_image_urls($content);
+             $image_urls = self::find_all_image_urls($content, $domains);
 
              // For each of the image links we found.
              foreach ($image_urls as $image_url) {
@@ -215,7 +215,7 @@ class util {
 
              // Store content.
              $content = $assign->intro;
-             $image_urls = self::find_all_image_urls($content);
+             $image_urls = self::find_all_image_urls($content, $domains);
 
              // For each of the image links we found.
              foreach ($image_urls as $image_url) {
@@ -238,7 +238,7 @@ class util {
 
              // Store content.
              $content = $page->content;
-             $image_urls = self::find_all_image_urls($content);
+             $image_urls = self::find_all_image_urls($content, $domains);
 
              // For each of the image links we found.
              foreach ($image_urls as $image_url) {
