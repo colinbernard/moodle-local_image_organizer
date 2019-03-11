@@ -93,7 +93,7 @@ class util {
    * @param  string  $target_directory  The target directory to store images in.
    * @param  boolean  $pluginfile  Whether or not we should search for Moodle database images.
    */
-  public static function update_courses($course_ids = array(), $target_directory, $pluginfile) {
+  public static function update_courses($course_ids = array(), $target_directory, $pluginfile, $ignore_strings) {
     global $DB, $CFG;
 
     mtrace("Starting update for " . count($course_ids) . " courses using $target_directory.");
@@ -151,8 +151,15 @@ class util {
             WHERE course = ?', array($course->id)
          );
 
+         // Retrieve all pages for this course.
+         $pages = $DB->get_records_sql(
+           'SELECT id, name, content
+            FROM {page}
+            WHERE course = ?', array($course->id)
+         );
+
          // If we found at least one book chapter.
-         if ($book_chapters || $quizzes || $assigns) {
+         if ($book_chapters || $quizzes || $assigns || $pages) {
 
            // For each of the book chapters.
            foreach ($book_chapters as $book_chapter) {
@@ -168,7 +175,7 @@ class util {
              foreach ($image_urls as $image_url) {
 
                $image_info = self::get_image_info($image_url, 'book', $course_id, $book_chapter, $pluginfile);
-               $new_url = self::process_image($server_directory, $image_info);
+               $new_url = self::process_image($server_directory, $image_info, $ignore_strings);
 
                // Update the link in the content.
                if ($image_info['full_image_path'] != $new_url && $new_url !== false) {
@@ -191,7 +198,7 @@ class util {
              foreach ($image_urls as $image_url) {
 
                $image_info = self::get_image_info($image_url, 'quiz', $course_id, $quiz, $pluginfile);
-               $new_url = self::process_image($server_directory, $image_info);
+               $new_url = self::process_image($server_directory, $image_info, $ignore_strings);
 
                // Update the link in the content.
                if ($image_info['full_image_path'] != $new_url && $new_url !== false) {
@@ -214,12 +221,35 @@ class util {
              foreach ($image_urls as $image_url) {
 
                $image_info = self::get_image_info($image_url, 'assign', $course_id, $assign, $pluginfile);
-               $new_url = self::process_image($server_directory, $image_info);
+               $new_url = self::process_image($server_directory, $image_info, $ignore_strings);
 
                // Update the link in the content.
                if ($image_info['full_image_path'] != $new_url && $new_url !== false) {
                  // $assign->intro = self::update_url_in_content($content, $image_info['full_image_path'], $new_url);
                  // $DB->update_record('assign', $assign);
+                 mtrace("Updated this image URL in the database.");
+               }
+             }
+           }
+
+           foreach ($pages as $page) {
+             mtrace('-------------------------------------------------');
+             mtrace("Searching page '".str_replace("\"", "", $page->name)."' for images...");
+
+             // Store content.
+             $content = $page->content;
+             $image_urls = self::find_all_image_urls($content);
+
+             // For each of the image links we found.
+             foreach ($image_urls as $image_url) {
+
+               $image_info = self::get_image_info($image_url, 'page', $course_id, $page, $pluginfile);
+               $new_url = self::process_image($server_directory, $image_info, $ignore_strings);
+
+               // Update the link in the content.
+               if ($image_info['full_image_path'] != $new_url && $new_url !== false) {
+                 // $page->content = self::update_url_in_content($content, $image_info['full_image_path'], $new_url);
+                 // $DB->update_record('page', $page);
                  mtrace("Updated this image URL in the database.");
                }
              }
@@ -258,7 +288,7 @@ class util {
    * @param  array $image_info       Assoc. array of image information.
    * @return string                  The new URL of the image.
    */
-  private static function process_image($server_directory, $image_info, $ignore_strings = array('wcln.ca/_LOR/projects/', 'wcln.ca/_LOR/group_activities/', 'wcln.ca/_LOR/learning_guides')) {
+  private static function process_image($server_directory, $image_info, $ignore_strings = array('wcln.ca/_LOR/projects/', 'wcln.ca/_LOR/group_activities/', 'wcln.ca/_LOR/learning_guides', 'wcln.ca/_LOR/course_pics/_general')) {
     global $CFG;
 
     $save_location = $server_directory . "/" . $image_info['image_name'];
@@ -405,6 +435,30 @@ class util {
           mtrace("ERROR retrieving context.");
           return false;
         }
+      } else if ($type === "page") {
+
+        $cm = $DB->get_record('course_modules', array('instance' => $item->id, 'course' => $course_id));
+        if ($cm) {
+          $context = \context_module::instance($cm->id);
+          $image_info['full_image_path'] = "$CFG->wwwroot/pluginfile.php/$context->id/mod_page/content/0/" . $image_info['image_name'];
+
+          $fileinfo = array(
+             'component' => 'mod_page',
+             'filearea' => 'content',
+             'itemid' => 0,
+             'context' => $context,
+             'filepath' => '/',
+             'filename' => $image_info['image_name']
+          );
+
+          $image_info['fileinfo'] = $fileinfo;
+
+
+        } else {
+          mtrace("ERROR retrieving context.");
+          return false;
+        }
+
       } else {
         mtrace("ERROR Invalid type.");
         return false;

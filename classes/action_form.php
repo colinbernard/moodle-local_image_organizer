@@ -28,8 +28,12 @@ class action_form extends \moodleform {
     $mform->setDefault('pluginfile', 1);
     $mform->addHelpButton('pluginfile', 'pluginfile', 'tool_imageorganizer');
 
-    $this->add_action_buttons(false, get_string('run', 'tool_imageorganizer'));
+    $mform->addElement('text', 'ignore', get_string('ignore', 'tool_imageorganizer'));
+    $mform->setType('ignore', PARAM_RAW);
+    $mform->setDefault('ignore', 'wcln.ca/_LOR/course_pics/projects,wcln.ca/_LOR/course_pics/learning_guides,wcln.ca/_LOR/course_pics/projects,wcln.ca/_LOR/course_pics/_general,wcln.ca/_LOR/course_pics/group_activities');
+    $mform->addHelpButton('ignore', 'ignore', 'tool_imageorganizer');
 
+    $this->add_action_buttons(false, get_string('run', 'tool_imageorganizer'));
   }
 
   public function validation($data, $files) {
