@@ -24,16 +24,16 @@ $form = new \tool_imageorganizer\action_form();
 
 if ($fromform = $form->get_data()) {
 
+  $renderer = $PAGE->get_renderer('tool_imageorganizer');
+  echo $renderer->link_back();
+
   echo html_writer::start_tag('pre');
   $CFG->mtrace_wrapper = 'tool_task_mtrace_wrapper';
 
   util::update_courses($fromform->courses, $fromform->directory, $fromform->pluginfile);
 
   echo html_writer::end_tag('pre');
-
-  $renderer = $PAGE->get_renderer('tool_imageorganizer');
   echo $renderer->link_back();
-
 
 } else {
   $form->display();
