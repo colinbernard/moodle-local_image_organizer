@@ -36,7 +36,7 @@ class util {
    * @param  array $fileinfo      Optional file information. Used for saving pluginfile images.
    * @return boolean                Success?
    */
-  private static function save_image($save_location, $image_url, $fileinfo = null, $increase_count = true) {
+  private static function save_image($save_location, $image_url, $image_name, $fileinfo = null, $increase_count = true) {
 
     // Pluginfile saving.
     if (!is_null($fileinfo)) {
@@ -60,6 +60,7 @@ class util {
 
     // Normal file saving.
     } else {
+      $image_url = str_replace($image_name, rawurlencode($image_name), $image_url);
       $file_contents = file_get_contents($image_url);
 
       if ($file_contents !== false && filesize($file_contents) !== 0) {
@@ -313,7 +314,7 @@ class util {
     if (!file_exists($save_location)) {
 
       // Save the image.
-      if(!self::save_image($save_location, $image_info['full_image_path'], $image_info['fileinfo'])) {
+      if(!self::save_image($save_location, $image_info['full_image_path'], $image_info['image_name'], $image_info['fileinfo'])) {
         return false;
       }
 
@@ -338,7 +339,7 @@ class util {
       // Save the image.
       if ($save) {
 
-        if(!self::save_image($save_location, $image_info['full_image_path'], $image_info['fileinfo'])) {
+        if(!self::save_image($save_location, $image_info['full_image_path'], $image_info['image_name'], $image_info['fileinfo'])) {
           return false;
         }
 
@@ -501,7 +502,7 @@ class util {
       $temp_url = str_replace($image_info['image_name_without_file_type'], "temp_$rand", $save_location);
 
       // Attempt to save the pluginfile image to our temp location.
-      if (self::save_image($temp_url, $image_info['full_image_path'], $image_info['fileinfo'])) {
+      if (self::save_image($temp_url, $image_info['full_image_path'], $image_info['image_name'], $image_info['fileinfo'])) {
 
         // If the temp file and the existing file are the same.
         if (md5(file_get_contents($save_location)) == md5(file_get_contents($temp_url))) {
